@@ -1,75 +1,47 @@
 import { trpc } from "@/lib/trpc";
-import { COOKIE_NAME, UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, TRPCClientError } from "@trpc/client";
+import { httpBatchLink, httpLink, splitLink } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { startLogin } from "./const";
 import "./index.css";
+import { uploadProgressFetch } from "@/lib/upload-progress";
 
-const queryClient = new QueryClient();
-
-const redirectToLoginIfUnauthorized = (error: unknown) => {
-  if (!(error instanceof TRPCClientError)) return;
-  if (typeof window === "undefined") return;
-
-  const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
-
-  if (!isUnauthorized) return;
-
-  startLogin();
-};
-
-queryClient.getQueryCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.query.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
-  }
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, retry: 1 },
+    mutations: { retry: 0 },
+  },
 });
 
-queryClient.getMutationCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.mutation.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Mutation Error]", error);
-  }
-});
+function readCsrfCookie() {
+  const cookie = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith("polina_csrf="));
+  return cookie ? decodeURIComponent(cookie.slice("polina_csrf=".length)) : "";
+}
+
+function csrfHeaders() {
+  const token = readCsrfCookie();
+  return token ? { "x-polina-csrf": token } : {};
+}
 
 const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
+  links: [splitLink({
+    condition: (operation) => operation.path === "admin.uploadProductImage",
+    true: httpLink({
       url: "/api/trpc",
       transformer: superjson,
-      headers() {
-        // Preview auto-login fallback: when the browser blocks iframe cookies
-        // (Safari ITP / private browsing / WebView), the runtime mirrors the
-        // session into sessionStorage so we can forward it as a Bearer token.
-        // The regular OAuth cookie flow keeps working and takes priority server-side.
-        try {
-          const raw = sessionStorage.getItem("manus-cookie");
-          if (raw) {
-            const prefix = `${COOKIE_NAME}=`;
-            const pair = raw.split(";").find(s => s.trim().startsWith(prefix));
-            const token = pair?.trim().slice(prefix.length);
-            if (token) {
-              return { Authorization: `Bearer ${token}` };
-            }
-          }
-        } catch {
-          // sessionStorage unavailable
-        }
-        return {};
-      },
+      headers: csrfHeaders,
+      fetch: uploadProgressFetch,
+    }),
+    false: httpBatchLink({
+      url: "/api/trpc",
+      transformer: superjson,
+      headers: csrfHeaders,
       fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
+        return globalThis.fetch(input, { ...(init ?? {}), credentials: "include" });
       },
     }),
-  ],
+  })],
 });
 
 createRoot(document.getElementById("root")!).render(
@@ -77,5 +49,5 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
-  </trpc.Provider>
+  </trpc.Provider>,
 );

@@ -1,0 +1,85 @@
+# POLINA Website — Outcome Checklist
+
+## 1. Public POLINA landing page and navigation
+
+- [x] The responsive home page clearly presents POLINA and links to the collection.
+- [x] The page includes a POLINA wordmark, primary navigation, product/category entry points, and a clear mobile navigation pattern.
+- [ ] The hero contains a brand-led headline, short supporting copy, prominent fashion imagery, and a primary collection CTA. Text and imagery are editable by an admin where practical. The hero image asset is not yet present; the CSS editorial fallback remains visible.
+- [x] The featured collection shows selected published products with image, product name, category or short label, and a clear product-detail action when products are supplied and published.
+- [x] An editable brand statement/editorial section, category discovery for relevant categories (including nightwear/clothing), and a footer with configurable identity/navigation/social/informational links are provided.
+- [x] Do not invent legal policies or social accounts. Keep the interface presentable when optional social links are absent.
+- [x] Use clearly marked replaceable sample copy/items until the user provides POLINA-approved content and catalog data.
+
+## 2. Published collection, category, product detail, and retailer flow
+
+- [x] Only published, active products are visible to public visitors; drafts/unpublished items are not reachable in a public listing or by direct product URL.
+- [x] Visitors can browse products and categories and open a product detail view/page. Product cards show image, name, and category; omit price unless supplied and maintained by POLINA.
+- [x] A product detail includes name, images with alt text, description, category, and one or both explicit retailer actions: “Shop on Amazon” and/or “Shop on Flipkart.” Do not show a broken/empty button when a retailer URL is absent.
+- [ ] External purchase links are validated and safely opened in a new tab/window where appropriate, with secure link attributes. Show an affiliate disclosure when applicable and as decided by the brand. Affiliate/tracking policy remains a POLINA launch decision.
+- [x] Product slugs are human-readable, unique, and stable after publishing unless an admin deliberately changes them. An invalid or unpublished slug displays a useful not-found state.
+- [x] The shopper flow is home → collection/category → product detail → retailer site. POLINA does not implement its own checkout, payments, cart, orders, shipping, returns, or customer accounts in this initial release.
+- [x] Search and multiple filters are optional enhancements, not launch blockers; if present, they return only published products and work on mobile. Search and advanced filters are not included in this initial release.
+
+## 3. Reference-led design, motion, and inclusive responsive interaction
+
+- [ ] Closely match the user's Serotoninn reference at https://minimal.gallery/serotoninn/: stark editorial fashion direction, split-tone portrait hero with torn vertical seam, oversized condensed type, minimal edge navigation, monochrome base with vivid red emphasis, horizontal product rail, and full-width campaign/editorial blocks. Keep POLINA's own identity/content and do not reuse the reference brand's logo or product photos. The split-tone layout is implemented, but the original hero image is still pending.
+- [x] Apply the user's Liquid Text component reference at https://www.vengenceui.com/components/liquid-text to the POLINA hero headline, with the text retained as selectable, semantic HTML. Provide a static fallback for reduced motion, unavailable WebGL, or unsupported rendering; limit the effect to the hero, cap render work, and clean up resize/listener/GPU resources.
+- [x] Adapt the user's supplied animated Contact flip-button source to the React/Vite project. The supplied front letters spell “CONTACT”; reveal matching icons and short labels with a restrained flip/tooltip effect. Do not use the supplied `#` URLs as real destinations. Only display active channels/links that the user provides; otherwise keep Contact fields configurable and avoid inventing POLINA accounts.
+- [x] Buttons use restrained hover/focus/pressed states. Optional cursor-follow effects are bounded, pointer-only, and have no layout shift. Product cards use small image/border/shadow transitions; selected sections may use gentle reveal/stagger. Navigation/menu transitions are short and clear.
+- [x] All motion preserves keyboard/touch usability, visible focus, readable contrast, and clear click targets; respect `prefers-reduced-motion`, and disable or simplify pointer-dependent effects on touch/reduced-motion contexts.
+- [ ] Mobile-first layouts work across small/large phones, tablets, laptops, and wide desktops with no horizontal overflow and usable touch targets/navigation. Aim for WCAG 2.2 AA with semantic landmarks/headings, accessible labels/validation, keyboard-operable navigation/cards/dialogs/editors, meaningful alt text, adequate contrast, and no state communicated through color alone. Responsive and keyboard/reduced-motion behaviors are implemented; manual device and WCAG review remains.
+
+## 4. Secure administrator authentication and account recovery
+
+- [x] Admin signs in with email/password. There is no public self-registration. Admin accounts are provisioned through an authorized owner/backend process.
+- [x] All admin routes and content mutation endpoints are protected; hiding admin UI alone is not authorization. Validate and normalize input server-side, enforce authorization for every create/update/publish/delete, and never store passwords, admin tokens, or service-role secrets in browser local storage or client code.
+- [x] Use secure server/provider-managed sessions and secure cookie settings; explicit logout invalidates the session. Cookie-authenticated mutations receive CSRF protection where required. Preview's public HTTPS embedded cookie is configured `SameSite=None; Secure` without selecting attributes from internal `req.secure` or `NODE_ENV`.
+- [x] Rate-limit sign-in and password-reset requests and apply progressive protection against repeated failed attempts.
+- [ ] Password-reset requests return a neutral confirmation that does not disclose whether an email is registered. If the account exists, send a time-limited, single-use reset link; allow a new password and handle existing sessions according to the auth provider's secure reset policy. Neutral request behavior is implemented, but sending/reset delivery cannot be exercised until a transactional email provider is configured.
+- [x] Use hashed password storage, hashed one-time reset tokens with expiry, and basic security logging without passwords, reset tokens, or secrets. Do not expose default admin credentials.
+- [x] Production reset-link email delivery remains pending until an email provider is selected/connected and any required app secret is supplied through the protected project-secret flow.
+
+## 5. Admin dashboard and product management
+
+- [x] Dashboard counts reflect persisted data and current publish state: total products, draft products, and published products.
+- [x] Dashboard displays recent edits (item name, edit/publish event, editor where available, and time) and actionable warnings for missing product image, missing alt text, missing category, missing retailer URL, duplicate/invalid slug, or incomplete required fields. Warnings link to the relevant editor. Include shortcuts to add a product and manage page content.
+- [x] Authorized admins can create and edit products with: required product name; unique editable slug auto-suggested from name; one or more uploaded/stored images; required alt text for each meaningful image; plain-text or constrained sanitized description; required category and a simple approved category-management workflow; featured Boolean; draft/published state and unpublish; optional HTTPS Amazon URL; optional HTTPS Flipkart URL; and system-managed created/updated editor/timestamp metadata.
+- [x] Admins can save drafts, preview a product as it will appear publicly, publish only when required fields and at least one valid retailer URL are present unless the brand explicitly allows informational products without purchase links, unpublish, and archive. Confirm destructive removal and prefer archive/unpublish over permanent deletion where feasible.
+- [x] Warn before navigating away with unsaved changes. Validate retailer links, slug uniqueness, image format/size, and required fields, with clear inline errors. Changing a published slug warns about broken links and can use redirects if implemented.
+- [x] Product images have editable alt text; stored media assets cannot be mutated by anonymous or unauthorized users. Public content updates only after publication. Save operations expose clear progress, success, and error states.
+
+## 6. Editable landing-page content and Contact content
+
+- [x] Admins can edit hero heading, supporting text, CTA label/target, brand/editorial text, featured-product selection, and configurable footer/social links.
+- [x] Page content supports draft/preview/publish behavior or an equivalent safe update flow; incomplete drafts are never exposed publicly.
+- [x] Contact section uses the user-supplied flip-button interaction and supports configurable contact methods/URLs. Real email/social contact values are not supplied yet; show no fake or active placeholder destination until provided.
+- [x] Public page content reflects only published versions; editor preview requires an authorized admin and is not indexed.
+
+## 7. Persistent catalog, media, authorization, and data validation
+
+- [x] Persist product/category/page content and edit metadata in the chosen backend; never use browser-local storage as the production database for shared administration, authentication, or publishing.
+- [x] Product records contain id, name, slug, description, category_id, image asset URL/path and alt text, featured flag, status (`draft`/`published`), amazon_url, flipkart_url, created_at, updated_at, created_by, updated_by, and published_at. Category records contain id, name, slug, sort_order, created_at, updated_at. Page content records contain id, page_key, structured editable sections, status/version, updated_at, updated_by, and published_at. Admin identity/session data is provider-managed or securely represented; never store plaintext passwords.
+- [x] Public application queries return only published content; admin mutations/uploads require an authenticated authorized admin. Storage prevents anonymous uploads/unauthorized overwrites; product assets can be served by controlled public URLs or CDN delivery.
+- [x] Uploads validate supported image formats and size limits, show progress and actionable errors, persist a stable asset reference and ownership/product metadata, and never store large media in Git.
+- [ ] Validate HTTPS retailer URLs against intended retailer domains and define treatment of redirects/tracking parameters before launch. Keep external secrets server-side. Domain validation is implemented; POLINA still needs to decide whether/how to use tracking parameters or redirects.
+- [ ] Select/document the production backend's authentication, authorization, storage, backup, and deployment configuration. The PRD recommends Supabase or Firebase; local storage is suitable only for a visual/offline mock and is not sufficient for production security/shared administration/reliable publishing. The current managed backend, auth, and storage are documented; the production backup/restore policy and final deployment configuration remain to be confirmed.
+
+## 8. States, privacy, SEO, and launch readiness
+
+- [x] Design and handle empty collection, no featured products, missing image, invalid URL, failed save, expired session, permission denied, missing page, and missing product states.
+- [x] Avoid collecting shopper personal data in the initial release. Sanitize rich text and protect against common injection/XSS risks; apply CSRF protection where session architecture requires it; use HTTPS in production and secure secret management.
+- [ ] Optimize and responsively serve images; lazy-load below-the-fold imagery; avoid large blocking animation and unnecessary third-party scripts. Target good Core Web Vitals on representative mobile connections; public pages are cacheable and published updates become visible. Lazy loading, route splitting, and render fallbacks are implemented; final photography/responsive-image configuration and representative mobile performance review remain.
+- [ ] Give each public page meaningful title, description, canonical URL, and social preview metadata. Product pages use readable slugs and indexable rendered content where feasible. Drafts/admin pages are not indexed. Provide sitemap and robots rules if deployment supports indexing. Route-specific metadata, noindex controls, and origin-dependent sitemap/robots handlers are implemented; no production origin is configured, so crawl indexing remains disabled.
+- [ ] Keep the site presentable when optional content is absent. Do not invent domain, policies, affiliate disclosure, social profiles, analytics/consent needs, taxonomy, or product attributes. Confirm brand-provided content and launch choices before production publication.
+
+## 9. POLINA-provided inputs and production launch gates
+
+- [ ] Replace provisional homepage sample copy with POLINA-approved brand text and supply the final logo, palette, typography, campaign photography, and image rights approval. The hero campaign image is not currently present; the designed fallback is active.
+- [ ] Supply the product catalog and approved category taxonomy, product images and alt text, product descriptions, and valid Amazon/Flipkart URLs. No sample product/category rows were inserted into the shared database; the storefront is ready to display published records when added.
+- [ ] Supply actual POLINA Contact email/social details and any footer/policy destinations. No placeholder social accounts are active.
+- [ ] Provision the first authorized admin privately using the operator provisioning workflow, and exercise sign-in/logout; no default admin credentials are exposed.
+- [ ] Select/connect a transactional email provider and configure its protected app secret before enabling password-reset delivery.
+- [ ] Set the production HTTPS origin/domain and indexing policy; then confirm canonical/social-preview URLs, sitemap and robots behavior before search indexing.
+- [ ] Confirm affiliate disclosure, retailer tracking/redirect policy, and any retailer attribution terms before activating purchase links.
+- [ ] Choose and verify a database and media backup/restore policy for production.
+- [ ] Complete a manual mobile/tablet/desktop and accessibility review, and assess production image sizes/Core Web Vitals after final brand photography is added.
