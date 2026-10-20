@@ -83,6 +83,10 @@ export default function LiquidText({
     const container: HTMLSpanElement = current;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isInViewport = () => {
+      const bounds = container.getBoundingClientRect();
+      return bounds.width > 0 && bounds.height > 0 && bounds.bottom > 0 && bounds.right > 0 && bounds.top < window.innerHeight && bounds.left < window.innerWidth;
+    };
     let three: ThreeNamespace | null = null;
     let renderer: WebGLRenderer | null = null;
     let scene: Scene | null = null;
@@ -96,7 +100,10 @@ export default function LiquidText({
     let intersection: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let animationId = 0;
-    let visible = document.visibilityState === "visible";
+    let introAnimationId = 0;
+    let introStarted = false;
+    let introPlayed = false;
+    let visible = document.visibilityState === "visible" && isInViewport();
     let reduceMotion = motionPreference.matches;
     let importing = false;
     let initialized = false;
@@ -104,11 +111,15 @@ export default function LiquidText({
 
     const cleanupScene = () => {
       if (animationId) window.cancelAnimationFrame(animationId);
+      if (introAnimationId) window.cancelAnimationFrame(introAnimationId);
       animationId = 0;
+      introAnimationId = 0;
+      introStarted = false;
       intersection?.disconnect();
       resizeObserver?.disconnect();
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("scroll", onViewportChange);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       if (renderer?.domElement.parentNode === container) container.removeChild(renderer.domElement);
@@ -135,11 +146,60 @@ export default function LiquidText({
       if (!disposed && visible && !reduceMotion && renderer && scene && camera) renderer.render(scene, camera);
     };
     const scheduleRender = () => {
-      if (!disposed && visible && !reduceMotion && renderer && !animationId) animationId = window.requestAnimationFrame(render);
+      if (!disposed && visible && !reduceMotion && renderer && !introStarted && !animationId) animationId = window.requestAnimationFrame(render);
     };
+
+    const cancelIntroSweep = () => {
+      if (introAnimationId) window.cancelAnimationFrame(introAnimationId);
+      introAnimationId = 0;
+      introStarted = false;
+    };
+
+    const startIntroSweep = () => {
+      if (disposed || reduceMotion || !visible || !renderer || !scene || !camera || !material || introPlayed || introStarted) return;
+      introStarted = true;
+      const startedAt = performance.now();
+      const duration = 1150;
+      const frame = (now: number) => {
+        introAnimationId = 0;
+        if (disposed || reduceMotion || !visible || !renderer || !scene || !camera || !material) {
+          introStarted = false;
+          return;
+        }
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = progress * progress * (3 - 2 * progress);
+        const displacement = material.uniforms.uDisplacement.value as InstanceType<ThreeNamespace["Vector3"]>;
+        displacement.set(-camera.right * 0.75 + camera.right * 1.5 * eased, Math.sin(progress * Math.PI * 2) * 0.14, 0.1);
+        renderer.render(scene, camera);
+        if (progress < 1) {
+          introAnimationId = window.requestAnimationFrame(frame);
+        } else {
+          displacement.set(1000, 1000, 1000);
+          renderer.render(scene, camera);
+          introStarted = false;
+          introPlayed = true;
+        }
+      };
+      introAnimationId = window.requestAnimationFrame(frame);
+    };
+
+    const syncVisibility = (intersecting = isInViewport()) => {
+      visible = document.visibilityState === "visible" && intersecting;
+      if (visible) {
+        if (!introPlayed) startIntroSweep();
+        else scheduleRender();
+      } else {
+        cancelIntroSweep();
+        if (animationId) window.cancelAnimationFrame(animationId);
+        animationId = 0;
+      }
+    };
+    const onViewportChange = () => syncVisibility();
 
     function onPointerMove(event: PointerEvent) {
       if (event.pointerType === "touch" || !three || !material || !camera || !hitPlane || !raycaster || !pointer || reduceMotion) return;
+      cancelIntroSweep();
+      introPlayed = true;
       const bounds = container.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
       pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -((event.clientY - bounds.top) / bounds.height) * 2 + 1);
@@ -166,29 +226,23 @@ export default function LiquidText({
       camera.bottom = -cameraDistance;
       camera.updateProjectionMatrix();
       renderer.setSize(bounds.width, bounds.height, false);
-      scheduleRender();
+      syncVisibility();
     }
 
-    const onVisibilityChange = () => {
-      visible = document.visibilityState === "visible";
-      if (visible) scheduleRender();
-      else if (animationId) {
-        window.cancelAnimationFrame(animationId);
-        animationId = 0;
-      }
-    };
+    const onVisibilityChange = () => syncVisibility();
 
     function onMotionChange(event: MediaQueryListEvent) {
       reduceMotion = event.matches;
       setStaticFallback(event.matches || !initialized);
       if (renderer) renderer.domElement.style.display = event.matches ? "none" : "block";
-      if (event.matches && animationId) {
-        window.cancelAnimationFrame(animationId);
+      if (event.matches) {
+        cancelIntroSweep();
+        if (animationId) window.cancelAnimationFrame(animationId);
         animationId = 0;
       }
       if (!event.matches) {
         if (!initialized) void initialize();
-        else scheduleRender();
+        else syncVisibility();
       }
     }
 
@@ -250,15 +304,11 @@ export default function LiquidText({
 
         intersection = typeof IntersectionObserver !== "undefined"
           ? new IntersectionObserver(([entry]) => {
-              visible = entry.isIntersecting && document.visibilityState === "visible";
-              if (visible) scheduleRender();
-              else if (animationId) {
-                window.cancelAnimationFrame(animationId);
-                animationId = 0;
-              }
+              syncVisibility(entry.isIntersecting);
             }, { threshold: 0.01 })
           : null;
         intersection?.observe(container);
+        if (!intersection) window.addEventListener("scroll", onViewportChange, { passive: true });
         resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
         resizeObserver?.observe(container);
         container.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -267,7 +317,7 @@ export default function LiquidText({
         document.addEventListener("visibilitychange", onVisibilityChange);
         void document.fonts?.ready.then(scheduleRender);
         setStaticFallback(false);
-        scheduleRender();
+        syncVisibility();
       } catch {
         importing = false;
         cleanupScene();

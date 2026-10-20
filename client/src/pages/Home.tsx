@@ -30,18 +30,18 @@ export default function Home() {
           <span className="hero__split" aria-hidden="true" />
           <span className="hero__seam" aria-hidden="true" />
           <div className="hero__grain" aria-hidden="true" />
-          <div className="hero__topline"><span>POLINA / NIGHT & DAY</span><span>01 — EDITORIAL</span></div>
-          <div className="hero__copy">
+          <div className="hero__topline" data-reveal="rise" data-reveal-delay="1"><span>POLINA / NIGHT & DAY</span><span>01 — EDITORIAL</span></div>
+          <div className="hero__copy" data-reveal="rise" data-reveal-delay="2">
             <span className="hero__eyebrow">{placeholderHero ? "SAMPLE CAMPAIGN · REPLACE BEFORE LAUNCH" : "POLINA / EDITORIAL"}</span>
             <h1 id="hero-heading"><LiquidText text={content.heroHeading || "POLINA"} className="hero__liquid" /></h1>
             <p>{content.heroDescription}</p>
             <Link className="button-red" href={safeInternalTarget(content.heroCtaTarget)}>{content.heroCtaLabel || "Explore the collection"}<ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>
-          <div className="hero__bottomline"><span>WOMENSWEAR / EDITION 001</span><a href="#featured">SCROLL TO DISCOVER <ArrowDown size={14} /></a><span>EST. POLINA</span></div>
+          <div className="hero__bottomline" data-reveal="rise" data-reveal-delay="3"><span>WOMENSWEAR / EDITION 001</span><a href="#featured">SCROLL TO DISCOVER <ArrowDown size={14} /></a><span>EST. POLINA</span></div>
           <span className="hero__side-note" aria-hidden="true">CONFIDENT · TACTILE · POLINA</span>
         </section>
 
-        <section id="featured" className="section section-featured">
+        <section id="featured" className="section section-featured" data-reveal="rise">
           <div className="section-heading">
             <div><span className="mono-label">01 / THE EDIT</span><h2>Selected<br /><em>PRODUCTS</em></h2></div>
             <p className="section-intro">Published pieces from the POLINA collection.</p>
@@ -51,17 +51,17 @@ export default function Home() {
           <ProductRail products={featured} />
         </section>
 
-        <section id="categories" className="section section-categories">
+        <section id="categories" className="section section-categories" data-reveal="rise">
           <div className="category-intro"><span className="mono-label">02 / FIND YOUR FORM</span><h2>Find your<br /><span>own rhythm.</span></h2><p>Browse the POLINA collection by category. Categories are managed with the catalog.</p></div>
           <CategoryIndex categories={categoriesQuery.data ?? []} />
         </section>
 
         <section id="story" className="editorial-panel">
-          <div className="editorial-panel__image" role="img" aria-label="Abstract editorial backdrop for the POLINA story">
+          <div className="editorial-panel__image" role="img" aria-label="Abstract editorial backdrop for the POLINA story" data-reveal="image">
             <span className="editorial-panel__stamp">P / 01</span>
             <span className="editorial-panel__word">POLINA</span>
           </div>
-          <div className="editorial-panel__copy">
+          <div className="editorial-panel__copy" data-reveal="rise" data-reveal-delay="2">
             <span className="mono-label">{placeholderStory ? "03 / BRAND NOTE · SAMPLE CONTENT" : "03 / BRAND NOTE"}</span>
             <h2>{content.editorialHeading}</h2>
             <p>{content.editorialBody}</p>

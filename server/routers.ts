@@ -29,6 +29,7 @@ import { hashPassword, requestPasswordReset, sha256, signInWithPassword, signOut
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { systemRouter } from "./_core/systemRouter";
 import type { SiteContent } from "../drizzle/schema";
+import { normalizeContactHref } from "@shared/contact-link";
 import { normalizeRetailerUrl } from "@shared/retailer";
 import { normalizeInternalPath } from "@shared/internal-path";
 
@@ -73,13 +74,8 @@ function validateSiteContent(content: SiteContent) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Use an internal path for the hero call-to-action." });
   }
   for (const item of content.contactLinks) {
-    if (item.href.startsWith("mailto:")) continue;
-    if (item.href.startsWith("tel:")) continue;
-    try {
-      const url = new URL(item.href);
-      if (url.protocol !== "https:") throw new Error();
-    } catch {
-      throw new TRPCError({ code: "BAD_REQUEST", message: `Use HTTPS, mailto:, or tel: for ${item.label}.` });
+    if (!normalizeContactHref(item.href)) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: `Use a valid HTTPS link, email address, or telephone number for ${item.label}.` });
     }
   }
 }

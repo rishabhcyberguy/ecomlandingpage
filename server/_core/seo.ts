@@ -2,6 +2,7 @@ import type { Express, NextFunction, Request, RequestHandler, Response } from "e
 import type { SiteContent } from "../../drizzle/schema";
 import { getPublishedPage, getPublishedProduct, listActiveCategories, listPublishedProducts } from "../polina-db";
 import { normalizeSeoDescription, normalizeSeoTitle } from "@shared/seo";
+import { normalizeContactHref } from "@shared/contact-link";
 import { normalizeRetailerUrl } from "@shared/retailer";
 import { safeInternalPath as normalizeInternalTarget } from "@shared/internal-path";
 
@@ -81,13 +82,7 @@ function safeMediaUrl(value: string | undefined, origin: string | null) {
 }
 
 function safeContactHref(value: string) {
-  if (value.startsWith("mailto:") || value.startsWith("tel:")) return value;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
+  return normalizeContactHref(value);
 }
 
 function safeInternalPath(value: string, fallback = "/collections") {

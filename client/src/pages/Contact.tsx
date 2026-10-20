@@ -11,11 +11,11 @@ export default function ContactPage() {
 
   return (
     <div className="site-shell"><SiteHeader /><main className="contact-page">
-      <div className="contact-page__eyebrow"><span className="mono-label">POLINA / CONTACT</span><span className="mono-label">CHANNELS ARE BRAND-MANAGED</span></div>
-      <h1>LET'S<br /><em>TALK.</em></h1>
-      <p className="contact-page__intro">{content.footerNote}</p>
+      <div className="contact-page__eyebrow" data-reveal="rise"><span className="mono-label">POLINA / CONTACT</span><span className="mono-label">CHANNELS ARE BRAND-MANAGED</span></div>
+      <h1 data-reveal="rise" data-reveal-delay="2">LET'S<br /><em>TALK.</em></h1>
+      <p className="contact-page__intro" data-reveal="rise" data-reveal-delay="3">{content.footerNote}</p>
       <ContactBlock links={content.contactLinks} />
-      <div className="contact-page__bottom"><span className="mono-label">NO CUSTOMER ACCOUNT REQUIRED</span><Link className="text-link" href="/collections">Return to the collection <ArrowUpRight size={15} /></Link></div>
+      <div className="contact-page__bottom" data-reveal="rise"><span className="mono-label">NO CUSTOMER ACCOUNT REQUIRED</span><Link className="text-link" href="/collections">Return to the collection <ArrowUpRight size={15} /></Link></div>
       {homeQuery.error ? <p className="inline-error" role="status">Contact details could not be loaded. Try again later.</p> : null}
     </main><SiteFooter note={content.footerNote} contactLinks={content.contactLinks} /></div>
   );
