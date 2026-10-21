@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from "react";
 import { Link2 } from "lucide-react";
 import { normalizeContactHref } from "@shared/contact-link";
 import {
+  FaAmazon,
   FaDiscord,
   FaEnvelope,
   FaFacebook,
@@ -15,19 +16,21 @@ import {
 export type ContactLink = {
   label: string;
   href: string;
-  icon: "email" | "instagram" | "facebook" | "linkedin" | "twitter" | "github" | "discord" | "other";
+  icon: "email" | "amazon" | "flipkart" | "instagram" | "facebook" | "linkedin" | "twitter" | "github" | "discord" | "other";
 };
 
 const contactLetters = "CONTACT";
 const icons = {
   email: FaEnvelope,
+  amazon: FaAmazon,
+  flipkart: Link2,
   instagram: FaInstagram,
   facebook: FaFacebook,
   linkedin: FaLinkedin,
   twitter: FaTwitter,
   github: FaGithub,
   discord: FaDiscord,
-  other: FaEnvelope,
+  other: Link2,
 };
 
 export default function SocialFlipButton({ items = [] }: { items?: ContactLink[] }) {

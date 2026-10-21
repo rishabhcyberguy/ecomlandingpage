@@ -8,7 +8,7 @@ import type { ContactLink } from "@/components/SocialFlipButton";
 import { usePageMeta } from "@/components/PolinaLayout";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 
-const ICON_OPTIONS: Array<ContactLink["icon"]> = ["email", "instagram", "facebook", "linkedin", "twitter", "github", "discord", "other"];
+const ICON_OPTIONS: Array<ContactLink["icon"]> = ["email", "amazon", "flipkart", "instagram", "facebook", "linkedin", "twitter", "github", "discord", "other"];
 
 export default function PageEditorPage() {
   const utils = trpc.useUtils();

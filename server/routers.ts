@@ -63,7 +63,7 @@ const contentSchema = z.object({
   contactLinks: z.array(z.object({
     label: z.string().trim().min(1).max(40),
     href: z.string().trim().min(1).max(1000),
-    icon: z.enum(["email", "instagram", "facebook", "linkedin", "twitter", "github", "discord", "other"]),
+    icon: z.enum(["email", "amazon", "flipkart", "instagram", "facebook", "linkedin", "twitter", "github", "discord", "other"]),
   })).max(12),
   featuredProductIds: z.array(idSchema).max(8).default([]).refine((ids) => new Set(ids).size === ids.length, "Select each featured product only once."),
 }).strict();

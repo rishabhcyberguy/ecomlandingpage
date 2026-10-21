@@ -52,7 +52,7 @@
 
 - [x] Admins can edit hero heading, supporting text, CTA label/target, brand/editorial text, featured-product selection, and configurable footer/social links.
 - [x] Page content supports draft/preview/publish behavior or an equivalent safe update flow; incomplete drafts are never exposed publicly.
-- [x] Contact section uses the user-supplied flip-button interaction and supports configurable contact methods/URLs. Real email/social contact values are not supplied yet; show no fake or active placeholder destination until provided.
+- [x] Contact section uses the user-supplied flip-button interaction and supports configurable contact methods/URLs. Four user-provided destinations—Amazon storefront, Flipkart search, Instagram profile, and `skfasionmart@gmail.com`—are saved in the homepage draft; no fake or active placeholder destination is used. The public version remains unchanged until a permitted publish.
 - [x] Public page content reflects only published versions; editor preview requires an authorized admin and is not indexed.
 
 ## 7. Persistent catalog, media, authorization, and data validation
@@ -63,7 +63,7 @@
 - [x] Uploads validate supported image formats and size limits, show progress and actionable errors, persist a stable asset reference and ownership/product metadata, and never store large media in Git.
 - [ ] Validate HTTPS retailer URLs against intended retailer domains and define treatment of redirects/tracking parameters before launch. Keep external secrets server-side. Domain validation is implemented; POLINA still needs to decide whether/how to use tracking parameters or redirects.
 - [ ] Select/document the production backend's authentication, authorization, storage, backup, and deployment configuration. The PRD recommends Supabase or Firebase; local storage is suitable only for a visual/offline mock and is not sufficient for production security/shared administration/reliable publishing. The current managed backend, auth, and storage are documented; the production backup/restore policy and final deployment configuration remain to be confirmed.
-- [ ] Complete the requested Vercel production deployment only after the connected account has an authorized team/project, the Express/function entry and static-asset routing are compatible, and backend runtime settings (`DATABASE_URL`, Manus API/storage credentials, project identity, auth secret, and OAuth endpoints) are configured through protected settings. Do not copy hidden Manus runtime secrets. Verify health, API, storefront, admin sign-in, and media paths before calling the deployment ready. The current Vercel account exposes no teams or projects, so this release is presently blocked on a deployment destination and runtime configuration.
+- [ ] Complete the requested Vercel deployment only after authorized access to the user's personal workspace is granted, a project exists, the Express/function entry and static-asset routing are compatible, and required backend settings are configured through protected Vercel settings. Do not copy hidden Manus runtime secrets without explicit authorization. Verify health, API, storefront, admin sign-in, and media paths before calling deployment ready. The Vercel identity is confirmed, but access to its default workspace returned 403 and no project has been created; runtime architecture and credential handling also remain unresolved.
 
 ## 8. States, privacy, SEO, and launch readiness
 
@@ -77,10 +77,14 @@
 
 - [ ] Replace provisional homepage sample copy with POLINA-approved brand text and supply the final logo, palette, typography, campaign photography, and image rights approval. The hero campaign image is not currently present; the designed fallback is active.
 - [ ] Supply the product catalog and approved category taxonomy, product images and alt text, product descriptions, and valid Amazon/Flipkart URLs. No sample product/category rows were inserted into the shared database; the storefront is ready to display published records when added.
-- [ ] Supply actual POLINA Contact email/social details and any footer/policy destinations. No placeholder social accounts are active.
+- [x] Supply actual POLINA Contact email/social details. The user provided three HTTPS destinations and `skfasionmart@gmail.com`; they are saved in the unpublished homepage draft with Amazon, Flipkart, Instagram, and email icons. Any footer/policy destinations remain pending; no placeholder social accounts are active.
 - [ ] Provision the first authorized admin privately using the operator provisioning workflow, and exercise sign-in/logout; no default admin credentials are exposed.
 - [ ] Select/connect a transactional email provider and configure its protected app secret before enabling password-reset delivery.
 - [ ] Set the production HTTPS origin/domain and indexing policy; then confirm canonical/social-preview URLs, sitemap and robots behavior before search indexing.
 - [ ] Confirm affiliate disclosure, retailer tracking/redirect policy, and any retailer attribution terms before activating purchase links.
 - [ ] Choose and verify a database and media backup/restore policy for production.
 - [ ] Complete a manual mobile/tablet/desktop and accessibility review, and assess production image sizes/Core Web Vitals after final brand photography is added.
+
+## 10. VS Code and Windows developer experience
+
+- [x] Open the repository root in VS Code with tracked workspace settings, TypeScript SDK selection, Tailwind/Prettier extension recommendations, a Node debugger profile, and tasks for starting the development server, type-checking, tests, and production build. Support Windows shell execution for `dev`, `start`, and optional static development while honoring `PORT`; document the pinned Node/pnpm setup and Manus backend credential boundary. Ignore local `.env` values and user-specific VS Code state.
