@@ -59,7 +59,12 @@ function validSiteContent(value: unknown): value is SiteContent {
 }
 
 function publicOrigin() {
-  const raw = process.env.PUBLIC_APP_ORIGIN?.trim();
+  if (isVercelPreview()) return null;
+  const configured = process.env.PUBLIC_APP_ORIGIN?.trim();
+  const deploymentHost = process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production"
+    ? process.env.VERCEL_URL?.trim()
+    : undefined;
+  const raw = configured || (deploymentHost ? `https://${deploymentHost.replace(/^https?:\/\//i, "")}` : "");
   if (!raw) return null;
   try {
     const url = new URL(raw);
@@ -68,6 +73,10 @@ function publicOrigin() {
   } catch {
     return null;
   }
+}
+
+function isVercelPreview() {
+  return process.env.VERCEL === "1" && process.env.VERCEL_ENV !== "production";
 }
 
 function safeMediaUrl(value: string | undefined, origin: string | null) {
@@ -248,7 +257,7 @@ function injectMetadata(template: string, page: PublicSeoPage, pathname: string)
   const tags = [
     `<meta name="description" content="${escapeAttribute(description)}" />`,
     `<meta name="keywords" content="POLINA, womenswear, nightwear, clothing, fashion" />`,
-    `<meta name="robots" content="${page.noIndex ? "noindex,nofollow" : "index,follow"}" />`,
+    `<meta name="robots" content="${page.noIndex || isVercelPreview() ? "noindex,nofollow" : "index,follow"}" />`,
     `<meta property="og:site_name" content="POLINA" />`,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:title" content="${escapeAttribute(title)}" />`,
@@ -279,10 +288,13 @@ function escapeXml(value: string) {
 export function registerSeoDocuments(app: Express) {
   app.get("/robots.txt", (_req, res) => {
     const origin = publicOrigin();
-    const lines = origin
-      ? ["User-agent: *", "Allow: /", "Disallow: /admin", "Disallow: /api/", `Sitemap: ${origin}/sitemap.xml`]
-      : ["User-agent: *", "Disallow: /"];
-    res.set("Cache-Control", "public, max-age=300").type("text/plain").send(`${lines.join("\n")}\n`);
+    const lines = isVercelPreview()
+      ? ["User-agent: *", "Disallow: /"]
+      : origin
+        ? ["User-agent: *", "Allow: /", "Disallow: /admin", "Disallow: /api/", `Sitemap: ${origin}/sitemap.xml`]
+        : ["User-agent: *", "Disallow: /"];
+    res.set("Cache-Control", isVercelPreview() ? "no-cache" : "public, max-age=300")
+      .type("text/plain").send(`${lines.join("\n")}\n`);
   });
 
   app.get("/sitemap.xml", async (_req, res) => {

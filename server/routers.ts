@@ -169,12 +169,12 @@ export const appRouter = router({
       productId: idSchema,
       fileName: z.string().trim().min(1).max(180),
       mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
-      base64: z.string().min(1).max(7_500_000),
+      base64: z.string().min(1).max(4_194_304),
       altText: z.string().trim().min(2).max(400),
     })).mutation(async ({ input }) => {
       const buffer = Buffer.from(input.base64, "base64");
-      if (buffer.length > 5 * 1024 * 1024 || !validateImageBytes(buffer, input.mimeType)) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Upload a valid JPEG, PNG, or WebP image up to 5 MB." });
+      if (buffer.length > 3 * 1024 * 1024 || !validateImageBytes(buffer, input.mimeType)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Upload a valid JPEG, PNG, or WebP image up to 3 MiB." });
       }
       const extension = input.mimeType === "image/jpeg" ? "jpg" : input.mimeType === "image/png" ? "png" : "webp";
       const { key, url } = await storagePut(`polina/products/${input.productId}/${Date.now()}.${extension}`, buffer, input.mimeType);

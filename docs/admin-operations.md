@@ -14,7 +14,7 @@ Password reset is deliberately neutral and rate-limited, but it does not mint or
 
 ## Product images and backups
 
-Uploads accept JPEG, PNG, or WebP up to 5 MB, check file signatures and require descriptive alt text. Images are stored in durable project storage and referenced from the database. Back up the managed database and the associated stored media on a schedule appropriate to the launch; test a restore procedure before relying on production publishing. Never store uploaded media or admin credentials in Git.
+Uploads accept JPEG, PNG, or WebP up to 3 MiB, check file signatures and require descriptive alt text. Images are stored in durable project storage and referenced from the database. Manus resolves stable `/manus-storage/` paths; the Vercel Function exchanges safe POLINA product-media keys for temporary signed HTTPS redirects. Back up the managed database and the associated stored media on a schedule appropriate to the launch; test a restore procedure before relying on production publishing. Never store uploaded media or admin credentials in Git.
 
 ## Launch choices still needed
 

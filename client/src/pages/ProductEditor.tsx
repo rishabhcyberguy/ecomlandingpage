@@ -146,8 +146,8 @@ export default function ProductEditorPage() {
       setLocalError("Save the product draft before uploading an image.");
       return;
     }
-    if (imageFile.size > 5 * 1024 * 1024) {
-      setLocalError("Images must be 5 MB or smaller.");
+    if (imageFile.size > 3 * 1024 * 1024) {
+      setLocalError("Images must be 3 MiB or smaller.");
       return;
     }
     if (!["image/jpeg", "image/png", "image/webp"].includes(imageFile.type)) {
@@ -231,7 +231,7 @@ export default function ProductEditorPage() {
         </section>
 
         <section className="admin-panel image-editor field-span-2">
-          <div className="admin-panel__heading"><div><span className="mono-label">MEDIA / ALT TEXT REQUIRED</span><h2>Product images <small>({images.length})</small></h2></div><span className="admin-footnote">JPEG, PNG, or WebP · max 5 MB each</span></div>
+          <div className="admin-panel__heading"><div><span className="mono-label">MEDIA / ALT TEXT REQUIRED</span><h2>Product images <small>({images.length})</small></h2></div><span className="admin-footnote">JPEG, PNG, or WebP · max 3 MiB each</span></div>
           {images.length ? <div className="image-admin-grid">{images.map((image, index) => <article className="image-admin-card" key={image.id}><img src={image.url} alt={image.altText} loading="lazy" /><label>Alt text<input defaultValue={image.altText} maxLength={400} minLength={2} onBlur={(event) => { const nextText = event.target.value.trim(); if (nextText && nextText !== image.altText && isValidId) updateImage.mutate({ productId: productId!, imageId: image.id, altText: nextText, sortOrder: index }, { onSuccess: () => { setNotice("Image alt text saved."); void Promise.all([utils.admin.product.invalidate({ id: productId! }), utils.admin.dashboard.invalidate()]); } }); }} /></label><button type="button" className="icon-text-button icon-text-button--danger" onClick={() => { if (window.confirm("Remove this image from the product? The stored asset itself is retained.")) removeImage.mutate({ productId: productId!, imageId: image.id }, { onSuccess: () => { setNotice("Image removed from product."); void Promise.all([utils.admin.product.invalidate({ id: productId! }), utils.admin.dashboard.invalidate()]); } }); }}><Trash2 size={14} /> Remove</button></article>)}</div> : <p className="admin-empty-copy">No product images yet. Save the product, then upload at least one image before publishing.</p>}
           <form className="upload-row" onSubmit={(event) => void handleUpload(event)}>
             <label className="upload-file-label"><ImagePlus size={16} /> Choose image<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImageFile(event.target.files?.[0] ?? null)} disabled={!isValidId} /></label>
